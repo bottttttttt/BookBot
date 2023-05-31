@@ -280,11 +280,11 @@ def login_2(message):
         btn0 = types.KeyboardButton('👤 Список читателей')
         markup.add(btn0)
         btn1 = types.KeyboardButton('Добавить книгу 📚')
-        btn2 = types.KeyboardButton('🗑 Удалить книгу 📚')
-        markup.add(btn1, btn2)
+        #btn2 = types.KeyboardButton('🗑 Удалить книгу 📚')
+        #markup.add(btn1, btn2)
         btn3 = types.KeyboardButton('Добавить автора ✍️')
-        btn4 = types.KeyboardButton('🗑 Удалить автора ✍️')
-        markup.add(btn3, btn4)
+        #btn4 = types.KeyboardButton('🗑 Удалить автора ✍️')
+        markup.add(btn1, btn3)
         back = types.KeyboardButton("↩️ Вернуться в главное меню")
         markup.add(back)
         bot.send_message(message.chat.id, 'Вход с правами администратора', reply_markup=markup)
@@ -488,9 +488,17 @@ def addbook(message):
     for el in book:
         book_info += f'{el[0]}\nАвтор: {el[1]} {el[2]}\nЖанр: {el[3]}\nДата публикации: {el[4]}\n-- -- --\n{el[5]}\n'
     bot.send_message(message.chat.id, book_info)
+
+    cur.execute(f"SELECT autor_f FROM autor WHERE (autor_f = '{autor_f}') AND (autor_i = '{autor_i}')")
+    exist = cur.fetchall()
     cur.close()
     conn.close()
-    bot.register_next_step_handler(message, admin)
+    if (not bool(len(exist))):
+        bot.register_next_step_handler(message, addautor_birth)
+        bot.send_message(message.chat.id, 'Этого автора еще нет в базе, его необходимо добавть в базу')
+        bot.send_message(message.chat.id, f"Введите дату рождения автора [{autor_i} {autor_f}]")
+    else:
+        bot.register_next_step_handler(message, admin)
 
 @bot.message_handler(content_types=['text'])
 def my_list(message):
